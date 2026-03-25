@@ -1,0 +1,486 @@
+{
+  "name": "invoice-generation-agent.json",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "checkout.session.completed",
+          "payment_intent.succeeded"
+        ]
+      },
+      "type": "n8n-nodes-base.stripeTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        -64
+      ],
+      "id": "897b461a-ec6d-4a8e-9d7f-3575db006e72",
+      "name": "Stripe Trigger",
+      "webhookId": "e81936a7-4163-4f23-a19c-cc91c248d7af",
+      "credentials": {
+        "stripeApi": {
+          "id": "4a0UPK3Cvlbd2EuO",
+          "name": "Stripe account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1924024-71fd-42c0-bc48-b8d784c100eb",
+              "name": "customer_name",
+              "value": "={{ $json.customer_details.name }}",
+              "type": "string"
+            },
+            {
+              "id": "0ae9f69f-3515-4af5-aac9-1639b4605d25",
+              "name": "email",
+              "value": "={{ $json.customer_details.email }}",
+              "type": "string"
+            },
+            {
+              "id": "149c242b-ca5a-4620-865c-ab8ce6f1c344",
+              "name": "amount",
+              "value": "={{ $json.amount_total }}",
+              "type": "number"
+            },
+            {
+              "id": "9a6f5fcb-9ad0-45f5-9906-9be5ddf2207d",
+              "name": "currency",
+              "value": "={{ $json.currency }}",
+              "type": "string"
+            },
+            {
+              "id": "0c3e56ba-522b-4bae-8845-b69f53d0880b",
+              "name": "invoice_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "15fb21bb-62a2-4b2c-b729-3d4df9f6fce7",
+              "name": "success_url",
+              "value": "={{ $json.success_url }}",
+              "type": "string"
+            },
+            {
+              "id": "67371c4c-aeef-4457-b69e-9a737f57b737",
+              "name": "cancel_url",
+              "value": "={{ $json.cancel_url }}",
+              "type": "string"
+            },
+            {
+              "id": "988c4b6e-0e68-4b8f-a4da-7f89b66ab26d",
+              "name": "payment_status",
+              "value": "={{ $json.payment_status }}",
+              "type": "string"
+            },
+            {
+              "id": "01cfdce4-67ab-471a-ae4f-d762669ee752",
+              "name": "created_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        -64
+      ],
+      "id": "45354a51-0159-420f-89a6-4e4af271d8f2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.stripe.com/v1/checkout/sessions/{{ $json[\"data\"][\"object\"][\"id\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Your Secret Key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        192,
+        -64
+      ],
+      "id": "9f373935-faa4-4413-94ac-00f4bd8f768d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1BKy82XG14imAvZZ0oQ2oqN1Pv18E26dRqhCjWQIAeFs",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BKy82XG14imAvZZ0oQ2oqN1Pv18E26dRqhCjWQIAeFs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1BKy82XG14imAvZZ0oQ2oqN1Pv18E26dRqhCjWQIAeFs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "invoice_id": "={{ $json.invoice_id }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "email": "={{ $json.email }}",
+            "amount": "={{ $json.amount }}",
+            "currency": "={{ $json.currency }}",
+            "success_url": "={{ $json.success_url }}",
+            "cancel_url": "={{ $json.cancel_url }}",
+            "payment_status": "={{ $json.payment_status }}",
+            "created_at": "={{ $json.created_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "invoice_id",
+              "displayName": "invoice_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "success_url",
+              "displayName": "success_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cancel_url",
+              "displayName": "cancel_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payment_status",
+              "displayName": "payment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        -64
+      ],
+      "id": "bc59667e-1604-426a-b604-fb28c7c52ec2",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1y5wP3Q32GPgS3FeGBJsjK0xSyTa8caC2mVfkGWpnPSg",
+          "mode": "list",
+          "cachedResultName": "Invoice PDF",
+          "cachedResultUrl": "https://docs.google.com/document/d/1y5wP3Q32GPgS3FeGBJsjK0xSyTa8caC2mVfkGWpnPSg/edit?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        -64
+      ],
+      "id": "db3fdffc-4d11-4392-bde7-fb442ff21b20",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Hn1nWGZccYqQJzMQ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/drive/v3/files/1y5wP3Q32GPgS3FeGBJsjK0xSyTa8caC2mVfkGWpnPSg/export?mimeType=application/pdf",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1216,
+        -64
+      ],
+      "id": "f962d475-ebd0-495c-a82b-c41de9783f2a",
+      "name": "HTTP Request1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "n9NbZtW4UTWRvotz",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://docs.googleapis.com/v1/documents/1y5wP3Q32GPgS3FeGBJsjK0xSyTa8caC2mVfkGWpnPSg:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"id\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.invoice_id }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"name\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.customer_name }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"mail\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.email }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"amnt\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.amount }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"curr\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.currency }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"status\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.payment_status }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"date\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.created_at }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"success\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.success_url }}\"\n      }\n    },\n    {\n      \"replaceAllText\": {\n        \"containsText\": {\n          \"text\": \"cancel\",\n          \"matchCase\": true\n        },\n        \"replaceText\": \"{{ $json.cancel_url }}\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        816,
+        -64
+      ],
+      "id": "ba1ec5b0-d2fa-4514-99cf-696c06c12317",
+      "name": "HTTP Request2",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "n9NbZtW4UTWRvotz",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=fatimaakmal2004@gmail.com",
+        "subject": "=Invoice from ABC Company To {{ $('Edit Fields').item.json.customer_name }}",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Invoice from ABC Company</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; background-color: #f7f7f7; padding: 20px;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; padding: 20px; border: 1px solid #e0e0e0;\">\n    <tr>\n      <td style=\"text-align: center; padding-bottom: 20px;\">\n        <h2 style=\"color: #333333; margin: 0;\">ABC Company</h2>\n        <p style=\"margin: 5px 0; font-size: 14px; color: #555555;\">\n          123 Business Street, City, Country<br>\n          Email: info@yourcompany.com | Phone: +123-456-7890\n        </p>\n      </td>\n    </tr>\n    <tr>\n      <td style=\"padding-bottom: 20px;\">\n        <p style=\"font-size: 14px; color: #555555;\">\n          Hi {{ $('Edit Fields').item.json.customer_name }},<br><br>\n          Please find your invoice attached with this email.<br><br>\n          Thank you for your business! If you have any questions, feel free to contact us at \n          <a href=\"mailto:info@yourcompany.com\">info@yourcompany.com</a>.\n        </p>\n      </td>\n    </tr>\n    <tr>\n      <td style=\"text-align: center; font-size: 12px; color: #999999; border-top: 1px solid #e0e0e0; padding-top: 10px;\">\n        This is a computer-generated email. Please do not reply directly.\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        -64
+      ],
+      "id": "7b1cb6b9-eb48-40fa-98d8-e54f4db98681",
+      "name": "Send a message",
+      "webhookId": "ad8ae2b2-658a-4072-9615-eb8488bc1606",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1632,
+        -64
+      ],
+      "id": "a48ef034-7c80-46bf-8cf7-7796d80956d2",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Stripe Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ce14fd28-c7ba-4301-bb26-d17dc23a24b1",
+  "meta": {
+    "instanceId": "4552bf278978bc0a6561beee94ca6bf9b6e6cd5dc3ef238522205c623a82eef9"
+  },
+  "id": "h0LHnOuiuNvPQFdz",
+  "tags": [
+    {
+      "updatedAt": "2026-03-19T07:42:02.098Z",
+      "createdAt": "2026-03-19T07:42:02.098Z",
+      "id": "luiS08h2Zp2rgF5Q",
+      "name": "invoice generation"
+    },
+    {
+      "updatedAt": "2026-03-19T07:42:02.140Z",
+      "createdAt": "2026-03-19T07:42:02.140Z",
+      "id": "NTNbzrC9Y1yac3eu",
+      "name": "payment reminder"
+    }
+  ]
+}
