@@ -9,10 +9,12 @@
 - Meeting Summarizer (Notion API)
 - Invoice Generation ( Stripe API)
 
-## Setup Instructions
-1. Deploy using Docker
-2. Import workflows from /workflows folder
-3. Configure environment variables
+#### Deployment
+
+1. Connect GitHub repo to Railway
+2. Deploy project
+3. Open n8n UI
+4. Import workflows from /workflows folder
 
 ## Requirements
 - Railway / VPS / Docker support
