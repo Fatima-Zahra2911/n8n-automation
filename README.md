@@ -8,6 +8,7 @@
 - Win back Customer Agent
 - Meeting Summarizer (Notion API)
 - Invoice Generation ( Stripe API)
+- Review Analyzer Agent 
 
 #### Deployment
 
