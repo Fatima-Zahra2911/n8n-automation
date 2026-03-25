@@ -1,0 +1,491 @@
+{
+  "name": "Customer Support Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -976,
+        48
+      ],
+      "id": "9cf948ce-da17-4420-968e-f95a6b439289",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert customer support classifier. \n### TASK:\nAnalyze the email and return a structured JSON response. \n\n### CLASSIFICATION RULES:\n- NORMAL: Pricing, style inspo, product ideas, general availability.\n- CRITICAL: Damaged gold plating, missing items, refund requests, angry customers, payment failures.\n\n### JSON STRUCTURE:\n{\n  \"urgency\": \"normal\" or \"critical\",\n  \"category\": \"pricing\", \"delivery\", \"complaint\", \"product\", \"refund\", or \"general\",\n  \"confidence\": 0.85,\n  \"customer_mood\": \"happy\", \"neutral\", \"frustrated\", or \"angry\",\n  \"reply\": \"Your professional response reflecting a modern feminine, luxury editorial tone.\"\n}\n\n### INPUT DATA:\nSubject: {{ $json.Subject }}\nEmail Body: {{ $json.snippet }}\n\n### IMPORTANT - SYSTEM OVERRIDE:\nDO NOT USE TRIPLE BACKTICKS (```). DO NOT USE THE WORD \"json\". \nOUTPUT THE RAW JSON OBJECT ONLY, STARTING WITH '{' AND ENDING WITH '}'.\nIF YOU ADD ANY MARKDOWN, THE PARSING WILL FAIL. \n\nJSON OUTPUT:",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -768,
+        48
+      ],
+      "id": "79765715-8c6e-4f06-8353-c49e34d3599e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        256
+      ],
+      "id": "a29a026a-e93a-4ce2-988c-a09b72682275",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JTdKtYfhkDgCukPk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Answer the query of user by checking /retrieve from pinecone",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "flowerdata2",
+          "mode": "list",
+          "cachedResultName": "flowerdata2"
+        },
+        "options": {
+          "pineconeNamespace": "FlowerShopData"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -608,
+        272
+      ],
+      "id": "31a55d8e-3482-4baf-a874-8438197b9fb3",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "rG84BeqERdG2h99b",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.threadId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -752,
+        256
+      ],
+      "id": "caa44638-f431-4e34-9999-26b5bd6f2186",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-2-preview"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        368
+      ],
+      "id": "37457437-809f-496a-a680-667bd84e58fc",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JTdKtYfhkDgCukPk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4f1a9161-6e29-454f-a88c-f537f2eff827",
+              "name": "Urgency",
+              "value": "={{JSON.parse($json.output).urgency}}",
+              "type": "string"
+            },
+            {
+              "id": "666a01bb-31f3-477f-aa90-c28d62d83f90",
+              "name": "catagory",
+              "value": "={{JSON.parse($json.output).category}}",
+              "type": "string"
+            },
+            {
+              "id": "fb6f691e-7c5a-4481-b33b-b2c55b0d2a91",
+              "name": "Confidence",
+              "value": "={{JSON.parse($json.output).confidence}}",
+              "type": "string"
+            },
+            {
+              "id": "5561ea1b-ba22-4154-b54f-03ec53f75dd4",
+              "name": "Customer mood",
+              "value": "={{JSON.parse($json.output).customer_mood}}",
+              "type": "string"
+            },
+            {
+              "id": "5b90055f-e969-4d9a-a257-13f507b47609",
+              "name": "Reply",
+              "value": "={{JSON.parse($json.output).reply}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        48
+      ],
+      "id": "f7a6ca14-2bfe-4bad-9f9f-6013dfd99f6e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.From }}",
+        "subject": "=Reply to {{ $('Gmail Trigger').item.json.Subject }}-Dear Customer",
+        "message": "={{ $json.Reply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "cfc41627-2b4b-4aef-8145-6439865c1731",
+      "name": "Send a message",
+      "webhookId": "300896a4-4aa2-4205-b027-0d664fb80136",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "af907589-972a-4b12-9c21-5edfe8cbe0c8",
+              "leftValue": "={{ $json.Confidence }}",
+              "rightValue": 0.7,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "46722c5d-1813-4477-a097-f299dfadbafa",
+              "leftValue": "={{ $json['Customer mood'] }}",
+              "rightValue": "frustrateds",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "09be7891-ddef-49f4-a6ab-ef6e3aac2921",
+              "leftValue": "={{ $json['Customer mood'] }}",
+              "rightValue": "angry",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        48
+      ],
+      "id": "bda49993-83d0-42c0-8a38-27bee1983b80",
+      "name": "Mood filter"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "=Reply to {{ $('Gmail Trigger').item.json.Subject }}-Dear Customer",
+        "message": "={{ $('Edit Fields').item.json.Reply }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        144
+      ],
+      "id": "7c752e8a-8291-40a8-83e8-d696bfc5bade",
+      "name": "Create a draft",
+      "webhookId": "f4fbe5f3-0c46-417a-a56b-32df0dd887b3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ccb9a1a6-5cd8-41fc-bf6f-e992b366e833",
+              "leftValue": "={{ $('Edit Fields').item.json.catagory }}",
+              "rightValue": "refund",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "4addcd8b-3919-48cf-a4b2-07374a9fb96f",
+              "leftValue": "={{ $('Edit Fields').item.json.catagory }}",
+              "rightValue": "complaint",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        144
+      ],
+      "id": "73821513-170a-4b1e-8848-4a446477e588",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        416,
+        240
+      ],
+      "id": "a856bef2-573a-499f-97fd-a990ada03b81",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "sendTo": "attiyashahzad262@gmail.com",
+        "subject": "Customer Issue ",
+        "message": "=Quiry raised by Customer (complaint/Refund) \nCustomer: {{ $('Gmail Trigger').item.json.From }}\nSubject:{{ $('Gmail Trigger').item.json.Subject }}\nMessage Urgency:{{ $('Edit Fields').item.json.Urgency }}\nCatagory:{{ $('Edit Fields').item.json.catagory }}\nCustomer mood:{{ $('Edit Fields').item.json['Customer mood'] }}\n\nCustomer message:{{ $('Gmail Trigger').item.json.snippet }}\n\nDraft Response created:\n{{ $('Edit Fields').item.json.Reply }}\n\nActions Required:\n1.Review the draft.\n2.Customize the reply\n3.Send it to customer?\n4.Follow up as necessary.\n\nGmail Link for you :https://mail.google.com/mail/u/0/#inbox/{{ $('Gmail Trigger').item.json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        48
+      ],
+      "id": "1b8382c2-88bf-4439-99cc-778f151cb74e",
+      "name": "Send a message1",
+      "webhookId": "cc5d75c8-5357-4f61-b8ef-e85444ae96a9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Mood filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mood filter": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6b88f229-afb4-433e-965c-1aded3f7db78",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4552bf278978bc0a6561beee94ca6bf9b6e6cd5dc3ef238522205c623a82eef9"
+  },
+  "id": "80RFdisazuPaWi2X",
+  "tags": []
+}

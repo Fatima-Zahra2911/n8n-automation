@@ -1,0 +1,533 @@
+{
+  "name": "AI MeetingSummarizer",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2c029d23-fd4a-4e8e-81f6-e2e82d8b02b4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4",
+          "mode": "list",
+          "cachedResultName": "Meeting details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "meeting detailss",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Not yet"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "a0e7305d-0045-43e1-8b7a-e645ea29e08a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.supadata.ai/v1/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.Link }}"
+            },
+            {
+              "name": "text",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "sd_6fc9e6dbf4fd580b1c7279e2170de9e0"
+            },
+            {
+              "name": "accept",
+              "value": "applicaition/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8c38d1ff-0f37-48ba-a7d8-a1ec399cbeec",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4",
+          "mode": "list",
+          "cachedResultName": "Meeting details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "meeting detailss",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Link": "={{ $('Get row(s) in sheet').item.json.Link }}",
+            "Transcript": "={{$json[\"content\"].substring(0,30000)}}"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        0
+      ],
+      "id": "55af717b-c0da-4cb7-a4c9-f2e5e2a87d18",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Transcript:\n{{ $json[\"Transcript\"] }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are an AI meeting assistant.\n\nAnalyze the following meeting transcript and return ONLY valid JSON.\n\nExtract:\n\n1. summary: a short paragraph summarizing the meeting.\n2. decisions: an array of key decisions made.\n3. action_items: an array of objects, each containing:\n   - task: description of the task\n   - assignee: who will do it (if not mentioned, write \"Unassigned\")\n   - deadline: date or \"None\" if not mentioned\n   - priority: High, Medium, or Low\n   - status: always \"To Do\"\n- Summary: text summry of meeting 2-3 lines\"\n- source: name of link source\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "f9458264-9584-40fa-b574-5e36c2c02c49",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        704,
+        208
+      ],
+      "id": "117458a4-e3b0-4830-a001-237539e7df45",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "9N3Beay1gkFAkhh8",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "3275537c-ae16-80e9-a377-e5b5b03b96ab",
+          "mode": "list",
+          "cachedResultName": "Meeting Tasks",
+          "cachedResultUrl": "https://www.notion.so/3275537cae1680e9a377e5b5b03b96ab"
+        },
+        "title": "Auto data",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Task Name|title",
+              "title": "={{ $json.task }}"
+            },
+            {
+              "key": "Assignee|rich_text",
+              "textContent": "={{ $json.assignee }}"
+            },
+            {
+              "key": "Deadline|rich_text",
+              "textContent": "={{ $json.deadline }}"
+            },
+            {
+              "key": "Priority|rich_text",
+              "textContent": "={{ $json.priority }}"
+            },
+            {
+              "key": "Status|rich_text",
+              "textContent": "={{ $json.status }}"
+            },
+            {
+              "key": "Meeting Summary|rich_text",
+              "textContent": "={{ $json.summary }}"
+            },
+            {
+              "key": "Source|rich_text",
+              "textContent": "={{ $json.source }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        0
+      ],
+      "id": "33347705-2c05-4e0a-83b3-a01a8a81165f",
+      "name": "Create a database page",
+      "credentials": {
+        "notionApi": {
+          "id": "K9N8FbHDl4qefDSR",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "fatimaakmal2911@gmail.com",
+        "subject": "Tasks added in Notion",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Tasks Added to Notion</title>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    h2 { color: #4CAF50; }\n    a { color: #1a73e8; text-decoration: none; }\n    .info { margin-top: 10px; margin-bottom: 20px; }\n    .footer { font-size: 0.9em; color: #888; margin-top: 20px; }\n  </style>\n</head>\n<body>\n  <h2>✅ Tasks Added to Notion</h2>\n\n  <div class=\"info\">\n <p>Meeting link: <a href=\"{{ $('Get row(s) in sheet').item.json.Link }}\">{{ $('Get row(s) in sheet').item.json.Link }}</a></p>\n    <p>All meeting tasks have been successfully added to Notion.</p>\n    <p>Check them here: <a href=\"https://www.notion.so/3275537cae1680e9a377e5b5b03b96ab?v=3275537cae1680ac8e06000cfe85cb32&source=copy_link\">Open Notion Database</a></p>\n  </div>\n\n  <div class=\"footer\">\n    This is an automated notification from your AI Meeting Agent.\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1552,
+        0
+      ],
+      "id": "e6efad1e-84ac-40e7-84ef-6951163813be",
+      "name": "Send a message",
+      "webhookId": "aa4c7cf0-1634-40f7-9d65-b53bcf40bb7d",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI output string to JSON and prepare for further workflow\nlet data = $input.first().json.output; // AI node output\nif (typeof data === \"string\") {\n  data = JSON.parse(data);\n}\n\n// Map action_items into separate objects with all fields, including source & summary\nlet items = data.action_items.map(item => {\n  return {\n    json: {\n      task: item.task,\n      assignee: item.assignee,\n      deadline: item.deadline,\n      priority: item.priority,\n      status: item.status,\n      summary: data.summary,   // include meeting summary\n      source: data.source   \n      // include source (e.g., Transcript)\n    }\n  };\n});\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "8dbad650-46ba-419a-ab65-b30f0c803733",
+      "name": "Output Parsing"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4",
+          "mode": "list",
+          "cachedResultName": "Meeting details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "meeting detailss",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bLoqa253zgRWMdjrtldaRw8aOExSWgOqjUo8_HcsxB4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Link": "={{ $('Get row(s) in sheet').item.json.Link }}",
+            "Status": "Done"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transcript",
+              "displayName": "Transcript",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1760,
+        16
+      ],
+      "id": "41c653f7-701b-41ec-9e31-74e3284cc0fb",
+      "name": "Append or update row in sheet"
+    }
+  ],
+  "pinData": {
+    "Get row(s) in sheet": [
+      {
+        "json": {
+          "row_number": 2,
+          "Date": "3/18/2026",
+          "Link": "https://youtu.be/poV3q_BS4rQ",
+          "Status": "Not yet",
+          "Transcript": ""
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Output Parsing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a database page": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Parsing": {
+      "main": [
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "36ef514b-d871-47f6-becd-eb28093647f5",
+  "meta": {
+    "instanceId": "4552bf278978bc0a6561beee94ca6bf9b6e6cd5dc3ef238522205c623a82eef9"
+  },
+  "id": "cZqEBtsG0s8heem5",
+  "tags": []
+}

@@ -1,0 +1,517 @@
+{
+  "name": "AI-Powered Job Application Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://weworkremotely.com/remote-jobs.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "670ee0c7-1221-45ad-b1e9-438a062751bf",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3371f48b-1cbc-4364-8153-2b3b8ad77492",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Data Scientist",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "09219858-1e90-4894-a40d-5d538664d761",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Python",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0f5414d7-2d97-4a06-b52a-eb02f5c5cd0b",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Machine Learning",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "82319c24-62a3-4fd4-9aaa-1d19b74655d1",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Frontend",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -208,
+        96
+      ],
+      "id": "1dbdf30e-9aea-4af0-b2fa-90c762c9d95e",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        256
+      ],
+      "id": "b3c76ff7-115e-4e24-a9ca-5fd79528f952",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional resume writer. \n\nJob Title: {{$json[\"title\"]}}\nJob Description: {{$json[\"contentSnippet\"]}}\nBase CV: [Fatima Zahra \n+92 3147430262 | EMAIL | GITHUB |  LINKEDIN \nSummary \nSoftware Engineering student with a strong foundation in machine learning, data science, and Python programming. Skilled \nin building predictive models and deploying end-to-end ML solutions through academic projects and internships. Eager to \ncontribute analytical thinking and technical skills to real-world data-driven challenges. \nEducation \nUniversity of Sargodha \nBachelors in Software Engineering \n• CGPA: 3.95/4.0 (through 7th semester) — Ranked 1st in 3rd, 4th,6th and 7th semesters \nSargodha, Pakistan \nAug. 2022 – Present \n• Relevant Coursework: Data Structures, Algorithms, Database Management Systems, Computer Networks, Statistics \nPunjab Group of Colleges \nFSC (Higher Secondary Education) — 98%                                                                                                        \nIslamic Alta Vista High School \nMatric (Secondary Education) — 96%                                                                                                        \nExperience \nAI Intern \nSargodha, Pakistan \n2019 – 2021 \nSargodha, Pakistan \n2016 – 2019 \nRemote \nBrit Sync \nFrontend Developer Intern \nDigital Empowerment Network \nWeb Developer Intern \nProdigy InfoTech \nProjects \nFace Mask Detection System   | Python, OpenCV, Scikit-learn, Flask, HTML/CSS/JS  \n2024 (6 weeks) \nRemote \n2024 (4 weeks) \nRemote \n2024 (4 weeks) \n• Developed an end-to-end face mask detection system using classical ML with Haar Cascade-based face detection and ROI \npreprocessing \n• Trained Logistic Regression and SVM classifiers achieving 85.7% accuracy; performed hyperparameter tuning with \nGridSearchCV \n• Deployed via Flask with a browser-based UI enabling real-time predictions \nE-Commerce Jewelry Sales Order Value Predictor   | Python, Pandas, Scikit-learn, Flask  \n• Built a regression model predicting jewelry order value from transaction-level e-commerce data with feature engineering (avg \nitem price, discounts, temporal features) \n• Trained a Random Forest Regressor achieving RMSE ≈ 2.15; designed full ML pipeline and deployed with Flask backend and \nweb frontend \nTechnical Skills \nLanguages: Python, C++, JavaScript, HTML5, CSS3, SQL, Tailwind CSS \nML & Data Science: Scikit-learn, Pandas, NumPy, Matplotlib, Seaborn, ML Algorithm Development, Predictive Modeling \nFrameworks & Tools: Flask, Git, VS Code, Jupyter Notebook, Google Cloud, XAMPP, MS Excel, MS Access \nCertifications: Generative AI (Google Cloud), AI for Everyone (Coursera), Foundations of Cybersecurity (Coursera), Python \nProficiency (Udemy) \nLanguages: English (B2 Upper Intermediate), Urdu (Native)]\n\nTask: Customize the CV for this job. Keep the output **well-formatted** with clear sections: \n\n- Contact Information  \n- Summary / Objective  \n- Key Skills (highlight skills relevant to the job description)  \n- Professional Experience (emphasize experience matching the job)  \n- Education  \n- Certifications (if relevant)  \n- Optional Projects (if relevant)\n\nFormatting Requirements:  \n- Use bullet points where possible  \n- Bold section headings  \n- Keep it concise, 1–2 pages  \n- Use clear, professional language  \n\nOutput only the CV text in this format; do not add explanations."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3a5404c3-191b-41e0-8ccb-189b5c2e661c",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "JTdKtYfhkDgCukPk",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst updatedItems = items.map((item) => {\n    const text = item?.json?.content?.parts[0]?.text || \"\";\n\n    // Create a proper binary property\n    item.binary = {\n        data: Buffer.from(text, \"utf-8\") // This creates real binary\n    };\n\n    return item;\n});\n\nreturn updatedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "2ce6d4fd-b166-4c55-857a-1261fa0bc477",
+      "name": "json to binary"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('If').item.json.title }}-CV.docx",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1o3xnSQm4eCrxPhnhlRFSQWhNU3XwmqeE",
+          "mode": "list",
+          "cachedResultName": "Generated cvs",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1o3xnSQm4eCrxPhnhlRFSQWhNU3XwmqeE"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        560,
+        0
+      ],
+      "id": "b7112d15-3cae-4a3d-8aea-e2097f7d4c9f",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Hn1nWGZccYqQJzMQ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JHd8SEK6KautBfXyhddL9Fpw__e6s8kCt1OP7RZE0gQ",
+          "mode": "list",
+          "cachedResultName": "Job tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JHd8SEK6KautBfXyhddL9Fpw__e6s8kCt1OP7RZE0gQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JHd8SEK6KautBfXyhddL9Fpw__e6s8kCt1OP7RZE0gQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Title": "={{ $('If').item.json.title }}",
+            "Job URL": "={{ $('If').item.json.link }}",
+            "Date Found": "={{ $('If').item.json.pubDate }}",
+            "cv link": "={{ $json.webViewLink }}",
+            "status": "Pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job URL",
+              "displayName": "Job URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date Found",
+              "displayName": "Date Found",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cv link",
+              "displayName": "cv link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        0
+      ],
+      "id": "ebb71d03-e501-4049-b450-844d350cd241",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "fatimaakmal2004@gmail.com",
+        "subject": "JOB Application – Fatima Zahra",
+        "message": "=Apply \n{{ $('RSS Read').item.json.link }}\nAttached is the customized cv for this job.",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "82665564-b02a-4367-addf-c124de319292",
+      "name": "Send a message",
+      "webhookId": "eb7ed32c-9dee-416c-aa97-60e13a47f064",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JHd8SEK6KautBfXyhddL9Fpw__e6s8kCt1OP7RZE0gQ",
+          "mode": "list",
+          "cachedResultName": "Job tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JHd8SEK6KautBfXyhddL9Fpw__e6s8kCt1OP7RZE0gQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JHd8SEK6KautBfXyhddL9Fpw__e6s8kCt1OP7RZE0gQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "Done"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Job URL",
+              "displayName": "Job URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Date Found",
+              "displayName": "Date Found",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "cv link",
+              "displayName": "cv link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "52492f28-0cb0-49e6-9b5d-d83ee0292d59",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -624,
+        96
+      ],
+      "id": "3c2da842-aa72-4683-b6c0-293bcdce0056",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "json to binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "json to binary": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e5f7a2bc-6595-438e-ac2f-c925548f2cc4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4552bf278978bc0a6561beee94ca6bf9b6e6cd5dc3ef238522205c623a82eef9"
+  },
+  "id": "Z7yZUNRP0s0yEJqr",
+  "tags": []
+}
