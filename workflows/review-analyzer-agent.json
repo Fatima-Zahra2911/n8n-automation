@@ -1,0 +1,464 @@
+{
+  "name": "Review Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7a04c22f-a107-45b3-a4a7-5f2e689a571d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94",
+          "mode": "list",
+          "cachedResultName": "Review analyzer",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f5889da6-aec8-4ec6-a6f6-dd432c961615",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let products = {};\nfor (let item of items) {\n  let name = item.json[\"Product Name\"];\n  if (!products[name]) products[name] = [];\n  products[name].push(item.json[\"Review Text\"]);\n}\n\nreturn Object.keys(products).map(name => ({\n  json: {\n    product_name: name,\n    review_text_array: products[name]\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6681a2ff-054c-47f9-a885-759cb7804c8e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following reviews for the product \"{{ $json[\"product_name\"] }}\" and return JSON as specified in the system message.\n\nReviews:\n{{ $json[\"review_text_array\"] }}",
+        "options": {
+          "systemMessage": "You are an expert e-commerce product analyst. \nYour task is to analyze product reviews and provide actionable insights. \nYou must always return a **structured JSON object** containing:\n\n1. sentiment – Overall sentiment of reviews: Positive / Negative / Mixed\n2. top_complaints – List of top 5 most common complaints from customers\n3. top_praises – List of top 5 features or points customers praise\n4. product_improvements – List of actionable suggestions to improve the product\n\nFocus only on the information in the provided reviews. \nDo not add unrelated opinions."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "28f4d7b0-666d-40d9-8d1c-68d5ad989d44",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        496,
+        208
+      ],
+      "id": "4653dd5a-76e8-4da9-a40a-59d5e0833383",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "9N3Beay1gkFAkhh8",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n    return {\n        json: JSON.parse(item.json.output)\n    };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "a83b472c-8e28-4ce2-9d24-e47e86cecb6c",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dce84522-10c5-49cf-8acf-9884b9724b36",
+              "name": "product_name",
+              "value": "={{ $('Code in JavaScript').item.json.product_name }}",
+              "type": "string"
+            },
+            {
+              "id": "2f8c5371-4b9a-48e6-989f-10b99bd13ebf",
+              "name": "sentiment",
+              "value": "={{ $json.sentiment }}",
+              "type": "string"
+            },
+            {
+              "id": "738cac36-edaf-4c27-bc87-8b385e2db2b3",
+              "name": "top_complaints",
+              "value": "={{ $json.top_complaints }}",
+              "type": "array"
+            },
+            {
+              "id": "4138df77-6c0a-411a-957f-07f892c02305",
+              "name": "top_praises",
+              "value": "={{ $json.top_praises }}",
+              "type": "array"
+            },
+            {
+              "id": "ccfe9a3b-b825-456a-b12e-c38592eccc99",
+              "name": "product_improvements",
+              "value": "={{ $json.product_improvements }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "7e8fd103-e841-4d29-a6cc-c815453de981",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94",
+          "mode": "list",
+          "cachedResultName": "Review analyzer",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2015830449,
+          "mode": "list",
+          "cachedResultName": "Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94/edit#gid=2015830449"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "product_name": "={{ $json.product_name }}",
+            "sentiment": "={{ $json.sentiment }}",
+            "top_complaints": "={{ $json.top_complaints }}",
+            "top_praises": "={{ $json.top_praises }}",
+            "product_improvements": "={{ $json.product_improvements }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "top_complaints",
+              "displayName": "top_complaints",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "top_praises",
+              "displayName": "top_praises",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_improvements",
+              "displayName": "product_improvements",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "97b191a1-a6fd-45f3-a9d1-7e523200f28a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n141nJQv2iKJcfuu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "fatimaakmal2911@gmail.com",
+        "subject": "Review Dashboard – Latest Insights",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>E-Commerce Review Dashboard</title>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    h2 { color: #2a7ae2; }\n    ul { margin: 10px 0; padding-left: 20px; }\n    li { margin-bottom: 5px; }\n    .footer { margin-top: 20px; font-size: 0.9em; color: #777; }\n  </style>\n</head>\n<body>\n  <h2>E-Commerce Review Dashboard – Latest Insights</h2>\n  \n  <p>Hello,</p>\n  \n  <p>Attached is the latest E-Commerce Review Dashboard for your products as of <strong>{{$now.format(\"YYYY-MM-DD\")}}</strong>.</p>\n  \n  <p>Key highlights included in this report:</p>\n  \n  <ul>\n    <li>Sentiment analysis of customer reviews (Positive / Mixed / Negative)</li>\n    <li>Top customer complaints</li>\n  </ul>\n  \n  <p>Please review the attached file for a complete visual summary of insights.</p>\n  \n  <p>Best regards,<br>\n</p>\n  \n  <p class=\"footer\">This is an automated report generated by the E-Commerce Review Analyzer Agent.</p>\n</body>\n</html>",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        16
+      ],
+      "id": "3af75f19-cfeb-494f-b887-407f3139ced1",
+      "name": "Send a message",
+      "webhookId": "a2e87e61-d8e0-44cb-bd08-ca322880f47b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uHkFyAFwwFaTAyXD",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1_GSSQ3OU6JZo7bilQ6dQlvY7HoJf6ARH40WO83ejd94/edit?usp=drivesdk",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "sheetsToFormat": "application/pdf"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "631e59e5-a687-4ce7-a50f-1322d641c024",
+      "name": "Download file",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Hn1nWGZccYqQJzMQ",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        16
+      ],
+      "id": "dce9b1d7-fa4a-4016-bd31-8f86028a139a",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "406220f8-b0f1-498d-920c-2c01eb14762f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4552bf278978bc0a6561beee94ca6bf9b6e6cd5dc3ef238522205c623a82eef9"
+  },
+  "id": "LEL6ksZR0UPHI1ck",
+  "tags": [
+    {
+      "name": "review analyzer",
+      "id": "yYR8YVAFIDIpVZFe",
+      "updatedAt": "2026-03-25T07:27:37.730Z",
+      "createdAt": "2026-03-25T07:27:37.730Z"
+    }
+  ]
+}
